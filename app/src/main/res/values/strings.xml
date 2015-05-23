@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">DefineMath</string>
+    <string name="defineMath">Define Math</string>
+    <string name="newGame">New Game</string>
+    <string name="bryantai">A Game By Bryan Tai</string>
+
+    <string name="pickANumber">Pick A Number That Is...</string>
+
+    <string name="mystery">\?\?\?</string>
+    <string name="even">EVEN</string>
+    <string name="odd">ODD</string>
+    <string name="positive">POSITIVE</string>
+    <string name="negative">NEGATIVE</string>
+    <string name="prime">PRIME</string>
+    <string name="composite">COMPOSITE</string>
+    <string name="moreThan">MORE THAN</string>
+    <string name="lessThan">LESS THAN</string>
+    <string name="equalTo">EQUAL TO</string>
+    <string name="unequalTo">UNEQUAL TO</string>
+    <string name="factor">A FACTOR OF</string>
+    <string name="multiple">A MULTIPLE OF</string>
+
+    <string name="not">NOT </string>
+
+    <string name="Score">Score:</string>
+
+</resources>

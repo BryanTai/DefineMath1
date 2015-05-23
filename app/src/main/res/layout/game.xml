@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+    <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp">
+        <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+            <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent" android:paddingLeft="10dp" android:paddingRight="20dp">
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?android:attr/textAppearanceLarge"
+                        android:text="@string/Score"
+                        android:id="@+id/score" android:padding="10dp" android:layout_gravity="center"
+                        android:textSize="14dp"/>
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?android:attr/textAppearanceLarge"
+                        android:text="0"
+                        android:id="@+id/scoreNumber" android:layout_gravity="center"/>
+            </LinearLayout>
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:text="@string/pickANumber"
+                    android:id="@+id/PickANumber" android:paddingTop="30dp"
+                    android:paddingBottom="20dp" android:textSize="20dp"/>
+        </LinearLayout>
+    </LinearLayout>
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="@string/mystery"
+            android:id="@+id/currentDefinition" android:layout_gravity="center_horizontal" android:textSize="36dp"
+            android:padding="10dp"/>
+    <TableLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent" android:background="@drawable/box" android:id="@+id/MathSquares">
+        <!-- TODO Put button styling into xml...-->
+        <TableRow
+                android:layout_width="fill_parent"
+                android:layout_height="0dp"
+                android:layout_column="0"
+                android:layout_weight="1" >
+            <Button
+                    android:layout_width="0dp"
+                    android:layout_height="fill_parent"
+                    android:id="@+id/button0"
+                    android:layout_weight="1"
+                    android:textSize="58dp"/>
+            <Button
+                    android:layout_width="0dp"
+                    android:layout_height="fill_parent"
+                    android:id="@+id/button1"
+                    android:layout_weight="1"
+                    android:textSize="58dp"/>
+        </TableRow>
+        <TableRow
+                android:layout_width="fill_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" >
+            <Button
+                    android:layout_width="0dp"
+                    android:layout_height="fill_parent"
+                    android:id="@+id/button2"
+                    android:layout_weight="1"
+                    android:textSize="58dp"/>
+            <Button
+                    android:layout_width="0dp"
+                    android:layout_height="fill_parent"
+                    android:id="@+id/button3"
+                    android:layout_weight="1"
+                    android:textSize="58dp"/>
+        </TableRow>
+    </TableLayout>
+    <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+    </LinearLayout>
+</LinearLayout>

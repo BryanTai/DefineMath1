@@ -53,9 +53,6 @@ public class ChoiceButton {
         return buttonWidget;
     }
 
-    public void setButtonWidget(Button buttonWidget) {
-        this.buttonWidget = buttonWidget;
-    }
 //
 //    public boolean[] getDefinitions() {
 //        return definitions;

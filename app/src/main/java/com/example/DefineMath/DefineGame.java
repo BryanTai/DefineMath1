@@ -124,10 +124,6 @@ public class DefineGame extends Activity {
         return scoreBoard;
     }
 
-    public void setScoreBoard(ScoreBoard scoreBoard) {
-        this.scoreBoard = scoreBoard;
-    }
-
     public DefinitionText getDefinitionText() {
         return definitionText;
     }

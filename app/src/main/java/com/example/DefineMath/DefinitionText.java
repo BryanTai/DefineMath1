@@ -4,6 +4,9 @@ import android.content.Context;
 import android.util.Log;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -40,13 +43,12 @@ public class DefinitionText {
     //Used for negations of definitions (I.E. "Not Even", "Not A Multiple Of 5")
     String not;
 
-    //Remembers the current definition we're using
+    //The current definition on display based on oneNumberDefinition or twoNumberDefinition
     int currentDefinitionIndex;
     //Are we using a oneNumberDefinition?
     boolean isOneNumberDefinition;
-    //Used for twoNumberDefinitions; The number that is randomly generated and used to check correctness
-    int secondNumber;
-//boolean currentDefinition;
+    //Used for twoNumberDefinitions; The number that is randomly generated and displayed along with definition
+    int secondNumberToDisplay;
 
     //Is this current game in HARD MODE?
     boolean isGameInHardMode = false; //TODO have DefineGame determine this somehow
@@ -82,14 +84,13 @@ public class DefinitionText {
             }
         }else{
             //twoNumberDefinition
-            //TODO Am i overcomplicating this with the extra methods?
             switch(currentDefinitionIndex) {
-                case 0: return isMultipleOf(currentChoiceNumber,secondNumber);//Multiple Of
-                case 1: return isMultipleOf(secondNumber,currentChoiceNumber);//Factor Of
-                case 2: return  isEqualTo(currentChoiceNumber,secondNumber);  //Equal
-                case 3: return !isEqualTo(currentChoiceNumber,secondNumber);  //Unequal
-                case 4: return isMoreThan(currentChoiceNumber,secondNumber);  //More than
-                case 5: return isMoreThan(secondNumber,currentChoiceNumber);  //Less than
+                case 0: return isMultipleOf(currentChoiceNumber, secondNumberToDisplay);//Multiple Of
+                case 1: return isMultipleOf(secondNumberToDisplay,currentChoiceNumber);//Factor Of
+                case 2: return currentChoiceNumber == secondNumberToDisplay;  //Equal
+                case 3: return currentChoiceNumber != secondNumberToDisplay;  //Unequal
+                case 4: return currentChoiceNumber > secondNumberToDisplay;  //More than
+                case 5: return currentChoiceNumber < secondNumberToDisplay;  //Less than
                 default : Log.i("COMEONANDSLAM","twoNumberMatching is broken!"); return false;
             }
         }
@@ -110,7 +111,7 @@ public class DefinitionText {
      * Else we're using a twoNumberDefinition:
      * - generate a random number in between max and min
      * - pick a twoNumberDefinition pair at random (with startIndex offset)
-     * - assign the secondNumber based on the random number and the definition.
+     * - assign the secondNumberToDisplay based on the random number and the definition.
      *
      *  startingPairIndex can truncate the definitions of Sign and Prime in the cases that the Button is 0 or 1
      */
@@ -129,36 +130,123 @@ public class DefinitionText {
             startingPairIndex = 1;
 
         //choose one or twoNumberDefinitions with a coin flip
-        isOneNumberDefinition = rand.nextInt() % 2 == 0;
+        isOneNumberDefinition = coinFlip();
+        //TODO Set this to test either one or twoNumberDefinitions
+       // isOneNumberDefinition = false;
 
         if(isOneNumberDefinition){
             if(choiceNumber == 1)   //1 is neither Prime nor Composite (so skip these definitions)
                 startingPairIndex = 1;
             if(choiceNumber == 0)   //0 is neither Prime nor Composite
                 startingPairIndex = 2;                   //and is neither Positive nor Negative (so skip these definitions)
-
-            secondNumber = -1; //for testing purposes + just to be safe
-
-        }else{
-            //twoNumberDefinition
-            secondNumber = generateSecondNumber();
+            currentDefinitionIndex = pickDefinitionIndex(startingPairIndex, choiceNumber);
         }
-
-        pickDefinitionIndex(startingPairIndex,choiceNumber,secondNumber);
+        else{ //twoNumberDefinition
+            currentDefinitionIndex = pickDefinitionIndex(startingPairIndex, choiceNumber);
+            secondNumberToDisplay = determineSecondNumber(choiceNumber, currentDefinitionIndex);
+        }
 
         updateTextView();
     }
 
+    private boolean coinFlip(){
+       return rand.nextInt() % 2 == 0;
+    }
+
+    /**
+     * determines the the second number depending on the chosen definition
+     * the currentDefinitionIndex needs to be decided first
+     */
+    private int determineSecondNumber(int startingNumber, int currentDefinitionIndex){
+        int secondNumber;
+        // 1 <= helperNumber < startingNumber
+        int helperNumber = generateHelperNumber(startingNumber);
+
+        switch (currentDefinitionIndex) {
+            case 0 : //Multiple Of
+                secondNumber = generateRandomFactor(startingNumber);
+                break;
+            case 1 : //Factor Of
+                secondNumber = helperNumber * startingNumber;
+                break;
+            case 2 : //Equal
+                secondNumber = startingNumber;
+                break;
+            case 3 : //Unequal
+                secondNumber = (coinFlip()) ? startingNumber * helperNumber : startingNumber + helperNumber;
+                break;
+            case 4 : //More than
+                secondNumber = startingNumber - helperNumber;
+                break;
+            case 5 : //Less than
+                secondNumber = startingNumber + helperNumber;
+                break;
+            default:
+                secondNumber = -1; Log.i("COMEONANDSLAM","secondNumberToDisplay BROKE");break;
+        }
+        return secondNumber;
+    }
+
+    /**
+     * generates a helperNumber based on startingNumber
+     * return 1 <= helperNumber < abs(startingNumber)
+     */
+    private int generateHelperNumber(int startingNumber){
+        return rand.nextInt(Math.abs(startingNumber) + 1); //TODO use defineGame's min max? or just leave simple?
+    }
+
+    /**
+     * Generates a random factor of the given choiceNumber
+     *
+     */
+    private int generateRandomFactor(int choiceNumber){
+        HashSet<Integer> factors = findFactors(choiceNumber);
+        int stopHere = rand.nextInt(factors.size());
+        int index = 0;
+        for (Integer factor : factors){
+            if(index == stopHere)
+                return factor;
+            index++;
+        }
+        throw new Error("generateRandomFactor dun goofed");
+    }
+
+    /**
+     * Finds all the factors of a given integer
+     */
+    private HashSet<Integer> findFactors(int x){
+        HashSet<Integer> factors = new HashSet<Integer>();
+        factors.add(x);
+        factors.add(1);
+
+        //check if x is negative
+        if (x < 0) {
+            factors.add(-1);
+            x = Math.abs(x);
+        }
+        int incrementer = 1;
+        //if x is odd, we can skip checking all the even factors
+        if (!isEven(x))
+            incrementer = 2;
+        for(int i=1; i*i<=x; i+=incrementer) {
+            if(x%i==0)
+                factors.add(i);
+        }
+        return factors;
+    }
+
+
+
     /**
      * Randomly generates an index of a definition
      * The currentDefinitionIndex has a lower chance of appearing.
-     * secondNumber is only used if isOnenumberDefinition is false.
+     * secondNumberToDisplay is only used if isOnenumberDefinition is false.
      *
      * required: isOneNumberDefinition has been determined already
      * post: startingPairIndex < returned int < length of definitions/2
      */
 
-    private void pickDefinitionIndex(int startingPairIndex, int choiceNumber, int secondNumber){
+    private int pickDefinitionIndex(int startingPairIndex, int choiceNumber){
 
         //First, randomly pick a pair
         int newPairIndex;
@@ -168,10 +256,8 @@ public class DefinitionText {
             newPairIndex = rand.nextInt((max - startingPairIndex) + 1) + startingPairIndex;
 
         //Now, determine which index of the pair to use as currentDefinition
-        if(isOneNumberDefinition)
-            currentDefinitionIndex = fromDefinitionPairToSingleIndex(newPairIndex, choiceNumber);
-        else
-            currentDefinitionIndex = fromDefinitionPairToSingleIndex(newPairIndex, choiceNumber, secondNumber);
+
+        return fromDefinitionPairToSingleIndex(newPairIndex, choiceNumber);
     }
 
     /**
@@ -179,29 +265,46 @@ public class DefinitionText {
      * and returns the proper single index from the oneNumberDefinitions
      */
     private int fromDefinitionPairToSingleIndex(int pairIndex, int choiceNumber){
-        switch (pairIndex){
-            case 0 : return isPrime(choiceNumber)    ? 0 : 1;
-            case 1 : return isPositive(choiceNumber) ? 2 : 3;
-            case 2 : return isEven(choiceNumber)     ? 4 : 5;
-            default : Log.i("COMEONANDSLAM","fromDefinitionPairToSingleIndex is broken...");return -1;
+        if(isOneNumberDefinition) {
+            switch (pairIndex) {
+                case 0:
+                    return isPrime(choiceNumber) ? 0 : 1;
+                case 1:
+                    return isPositive(choiceNumber) ? 2 : 3;
+                case 2:
+                    return isEven(choiceNumber) ? 4 : 5;
+                default:
+                    Log.i("COMEONANDSLAM", "fromDefinitionPairToSingleIndex is broken...");
+                    return -1;
+            }
+        }
+        else{ //twoNumberDefinition
+            int newIndex = pairIndex * 2; //All twoNumberDefinitions have a 50% chance for now
+            return (coinFlip()) ? newIndex : newIndex + 1;
+//            switch (pairIndex){
+//                case 0 : return coinFlip()  ? 0 : 1; // isMultipleOf works differently
+//                case 1 : return coinFlip() ? 2 : 3;
+//                case 2 : return coinFlip() ? 4 : 5;
+//                default : Log.i("COMEONANDSLAM","fromDefinitionPairToSingleIndex 2.0 is broken...");return -1;
+//            }
         }
     }
     /**
-     * Takes in a choiceNumber, the pair index, and the secondNumber
+     * Takes in a choiceNumber, the pair index, and the secondNumberToDisplay
      * and returns the proper single index from the twoNumberDefinitions
      */
-    private int fromDefinitionPairToSingleIndex(int pairIndex, int choiceNumber, int secondNumber){
-        switch (pairIndex){
-            case 0 : return choiceNumber >= secondNumber         ? 0 : 1; // isMultipleOf works differently
-            case 1 : return isEqualTo(choiceNumber, secondNumber) ? 2 : 3;
-            case 2 : return isMoreThan(choiceNumber, secondNumber)? 4 : 5;
-            default : Log.i("COMEONANDSLAM","fromDefinitionPairToSingleIndex 2.0 is broken...");return -1;
-        }
-    }
+//    private int fromDefinitionPairToSingleIndex(int pairIndex, int choiceNumber, int secondNumber){
+//        switch (pairIndex){
+//            case 0 : return (choiceNumber >= secondNumber)  ? 0 : 1; // isMultipleOf works differently
+//            case 1 : return (choiceNumber == secondNumber) ? 2 : 3;
+//            case 2 : return (choiceNumber > secondNumber) ? 4 : 5;
+//            default : Log.i("COMEONANDSLAM","fromDefinitionPairToSingleIndex 2.0 is broken...");return -1;
+//        }
+//    }
 
     /**
      * Changes the TextView to be the definition at oneNumberDefinitions at currentDefinitionIndex
-     * Pre: isOneNumberDefinition, the definition arrays, currentDefinitionIndex, and secondNumber have values
+     * Pre: isOneNumberDefinition, the definition arrays, currentDefinitionIndex, and secondNumberToDisplay have values
      */
     private void updateTextView(){
         //TODO allow for negatives (ie NOT EVEN)
@@ -211,7 +314,7 @@ public class DefinitionText {
         }
         else {
             toPrint += context.getString(twoNumberDefinitions[currentDefinitionIndex]);
-            toPrint += " " + secondNumber;
+            toPrint += " " + secondNumberToDisplay;
         }
         definitionTextWidget.setText(toPrint);
     }
@@ -260,11 +363,5 @@ public class DefinitionText {
         return x % y == 0;
     }
 
-    /**
-     * generates a secondnumber for twoNumberDefinitions to use
-     * @return 0 < secondNumber <= 10
-     */
-    private int generateSecondNumber(){
-        return rand.nextInt(10 + 1); //TODO use defineGame's min max? or just leave simple?
-    }
+
 }
